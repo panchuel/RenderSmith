@@ -540,14 +540,36 @@ do
     if f then f:close() end
 
     ok(body:find("curl", 1, true) ~= nil, "net: the script calls curl")
-    ok(body:find("WJ3xqLN8aPbnaTRsSrU8oA%3D%3D", 1, true) ~= nil,
-        "net: the base64 product id is percent-encoded, so = survives the form body")
     ok(body:find("WJ3xqLN8aPbnaTRsSrU8oA==", 1, true) == nil,
-        "net: and the raw = is not sent unencoded")
+        "net: the raw = is not sent unencoded")
     ok(body:find("rs_net.txt.tmp", 1, true) ~= nil,
         "net: curl writes to a .tmp name")
     ok(body:find("increment_uses_count=false", 1, true) ~= nil,
         "net: the increment flag is sent as given")
+
+    -- The percent trap, which cost a real activation failure.
+    --
+    -- cmd.exe expands % inside a batch file, so %3 is the third argument.
+    -- A base64 product id ending in "==" percent-encodes to "%3D%3D" and
+    -- reached the server as "DD", which it reported as an unknown product.
+    -- Every percent in a batch file has to be doubled to survive.
+    --
+    -- The earlier end-to-end check missed this because it used a made-up
+    -- key, and "that licence does not exist" is the answer either way. A
+    -- test whose expected result is a failure cannot tell you the success
+    -- path works.
+    if sep == "\\" then
+        ok(body:find("WJ3xqLN8aPbnaTRsSrU8oA%%3D%%3D", 1, true) ~= nil,
+            "net: percents are doubled, so the batch file passes them through")
+        -- Strip the legitimate pairs; anything left is a percent that cmd
+        -- would eat.
+        local stripped = (body:gsub("%%%%", ""))
+        ok(stripped:find("%%") == nil,
+            "net: no lone percent survives anywhere in the batch file")
+    else
+        ok(body:find("WJ3xqLN8aPbnaTRsSrU8oA%3D%3D", 1, true) ~= nil,
+            "net: the product id is percent-encoded, so = survives the form body")
+    end
 
     -- The rename must be conditional, or a failed curl would publish an
     -- empty body as if it were a real answer.

@@ -74,15 +74,25 @@ function net_post_form(url, fields, on_done)
 
     local script_file
     if sep == "\\" then
+        -- cmd.exe expands % inside a batch file: %3 is the third argument, so
+        -- a percent-encoded value loses every escape it has. A base64 product
+        -- id ending in "==" encodes to "%3D%3D" and arrives as "DD", which the
+        -- licence server then reports as an unknown product. Doubling every
+        -- percent is how a batch file passes one through literally.
+        local function batch_safe(text)
+            return (text:gsub("%%", "%%%%"))
+        end
+
         script_file = dir .. sep .. "rs_net.cmd"
         local f = io.open(script_file, "w")
         if not f then on_done(nil, "write_failed"); return false end
         f:write("@echo off\n")
         f:write(string.format(
             'curl.exe -s -m %d --data "%s" "%s" > "%s" 2>nul\n',
-            CURL_MAX_SEC, body, url, tmp))
-        f:write(string.format('if not errorlevel 1 move /Y "%s" "%s" >nul\n', tmp, out))
-        f:write(string.format('del "%s" >nul 2>&1\n', tmp))
+            CURL_MAX_SEC, batch_safe(body), batch_safe(url), batch_safe(tmp)))
+        f:write(string.format('if not errorlevel 1 move /Y "%s" "%s" >nul\n',
+            batch_safe(tmp), batch_safe(out)))
+        f:write(string.format('del "%s" >nul 2>&1\n', batch_safe(tmp)))
         f:close()
         reaper.ExecProcess('cmd.exe /C "' .. script_file .. '"', -1)
     else
