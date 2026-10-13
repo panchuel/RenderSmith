@@ -1319,6 +1319,7 @@ local _prev_view           = 0
 local _prev_state_count   = -1
 local _prev_sel_track     = nil
 local _prev_render_status = ""
+local _prev_lic_status    = ""
 local _prev_ovr_track     = false
 local _prev_item_count    = -1
 local _prev_item_first    = nil
@@ -1509,8 +1510,17 @@ GUI.func = function()
     -- License gate. Pinning the tab is the whole lock: Tabs:val switches
     -- the z-sets too, so every other pane hides itself. Checked every
     -- frame, which is free because license_state caches for 5 seconds.
-    if license_state().status == "expired" and GUI.elms.tabs.retval ~= 4 then
+    local lic = license_state()
+    if lic.status == "expired" and GUI.elms.tabs.retval ~= 4 then
         GUI.Val("tabs", 4)
+    end
+
+    -- A background revalidation can revoke a licence while the window is
+    -- open, and the trial can run out mid-session. Either way the tab above
+    -- locks, so the text on it has to agree.
+    if lic.status ~= _prev_lic_status then
+        _prev_lic_status = lic.status
+        refresh_license()
     end
 
     local cur_tab = GUI.elms.tabs.retval        -- 1 Main, 2 Config, 3 Render
@@ -1823,6 +1833,7 @@ function gui_start()
 
         _prev_type_idx      = RC.selected_type_idx
         _prev_render_status = RC.render_status
+        _prev_lic_status    = license_state().status
         refresh_ucs_tab()
         refresh_tree_view()
 
