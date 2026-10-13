@@ -2,14 +2,7 @@
 
 **Version 2.0**
 
-> **Before you publish this:** three things below are marked `[FILL IN]` and
-> only you can decide them: your legal name or company, your country, and your
-> support address. There is also a refund window to confirm against whatever
-> Gumroad's policy is at the time. This document is written to be clear and
-> ordinary, not to be legal advice. If RenderSmith starts earning real money,
-> have a lawyer in your jurisdiction read it once.
-
-This agreement is between you and [FILL IN: your legal name or company]
+This agreement is between you and Jose Daniel Montoya Molina
 ("we", "us"), the author of RenderSmith (the "Software"). By installing,
 activating or using the Software you accept it. If you do not accept it, do
 not use the Software.
@@ -122,7 +115,7 @@ under the law where you live.
 
 ## 11. Governing law
 
-This agreement is governed by the laws of [FILL IN: your country].
+This agreement is governed by the laws of Colombia.
 
 ## 12. Changes
 
@@ -131,6 +124,6 @@ released after the change, never retroactively to a copy you already bought.
 
 ---
 
-Copyright (c) 2026 [FILL IN: your legal name or company]. All rights reserved.
+Copyright (c) 2026 Jose Daniel Montoya Molina. All rights reserved.
 
 Questions about this agreement: panchusounds@gmail.com
